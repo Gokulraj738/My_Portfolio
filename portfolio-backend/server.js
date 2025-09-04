@@ -8,14 +8,16 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // ================== Middlewares ==================
-app.use(cors());
+// Allow only your frontend Firebase URL
+app.use(cors({
+  origin: "https://portfolio-3db4c.web.app"
+}));
 app.use(bodyParser.json());
 
 // ================== Contact API ==================
 app.post("/api/contact", async (req, res) => {
   const { name, email, subject, message } = req.body;
 
-  // Validation
   if (!name || !email || !subject || !message) {
     return res.status(400).json({
       success: false,
@@ -24,20 +26,18 @@ app.post("/api/contact", async (req, res) => {
   }
 
   try {
-    // Nodemailer transporter
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // App password
+        pass: process.env.EMAIL_PASS,
       },
     });
 
-    // Send mail
     await transporter.sendMail({
-      from: `"${name}" <${process.env.EMAIL_USER}>`, // shows visitor's name
-      to: process.env.EMAIL_USER,                  // your inbox
-      replyTo: email,                              // visitor's email for replies
+      from: `"${name}" <${process.env.EMAIL_USER}>`,
+      to: process.env.EMAIL_USER,
+      replyTo: email,
       subject: `Portfolio Contact: ${subject} (${name})`,
       text: `
 You received a new message from your portfolio contact form:
@@ -76,5 +76,5 @@ app.get("/api/test", (req, res) => {
 
 // ================== Start server ==================
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
